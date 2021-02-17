@@ -6,15 +6,8 @@ export default class App extends Component{
   constructor(props){
     super(props);
     this.state = {
-      tokenInput: '',
-      token: 'Carregando ',
-      nomeInput: '',
-      nome: '',
-      idadeInput: '',
-      idade: '',
+      lista : [],
     };
-
-    this.cadastrar = this.cadastrar.bind(this);
 
     let firebaseConfig = {
       apiKey: "AIzaSyB_nBUnQ0vj91hbB71VmeBpI5PPm7U5Iu0",
@@ -29,38 +22,25 @@ export default class App extends Component{
       firebase.initializeApp(firebaseConfig);
     }
 
-    firebase.database().ref('token').on('value', (snapshot) => {
+    firebase.database().ref('usuarios').on('value', (snapshot) => {
       let state = this.state;
-      state.token = snapshot.val();
+      state.lista = [];
+
+      snapshot.forEach((childItem) =>{
+        state.lista.push({
+          key: childItem.key,
+          nome: childItem.val().nome,
+          idade: childItem.val().idade,
+        });
+      });
+
       this.setState(state);
     });    
-
-    firebase.database().ref('usuarios').child(1).on('value', (snapshot) => {
-      let state = this.state;
-      state.nome = snapshot.val().nome;
-      state.idade = snapshot.val().idade;
-      this.setState(state);
-    });
     
   }
 
-  cadastrar(e){
-    //firebase.database().ref('token').set(this.state.tokenInput);
-    //firebase.database().ref('usuarios').child(1).child('idade').set(this.state.tokenInput);
-    //firebase.database().ref('usuarios').child(1).child('cargo').set(this.state.tokenInput);
-    //firebase.database().ref('usuarios').child(1).child('cargo').remove();
-
-    let usuarios = firebase.database().ref('usuarios');
-    let chave = usuarios.push().key;
-    usuarios.child(chave).set({
-      nome: this.state.nomeInput,
-      idade: this.state.idadeInput,
-    });
-    e.preventDefault();
-  }
-
   render(){
-    const {token, nome, idade} = this.state;
+    const {nome, idade} = this.state;
     return(
       <div>
 
@@ -74,9 +54,17 @@ export default class App extends Component{
           </div>  
         </form>        
 
-        <h1>Token: {token}</h1>
-        <h1>Nome: {nome}</h1>
-        <h1>Idade: {idade}</h1>
+        <div>
+          {this.state.lista.map((item) => {
+            return(
+              <div>
+                <h3>{item.key}</h3>
+                <h1>Olá {item.nome}</h1>
+                <h2>Idade {item.idade} anos</h2>
+              </div>
+            );
+          })}
+        </div>
 
       </div>
     );
