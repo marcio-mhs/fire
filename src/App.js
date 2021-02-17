@@ -6,58 +6,55 @@ export default class App extends Component{
   constructor(props){
     super(props);
     this.state = {
+      nome: '',
       email: '',
       senha: ''
     };
 
-    this.logar = this.logar.bind(this);
+    this.cadastrar = this.cadastrar.bind(this);
 
-    this.sair = this.sair.bind(this);
-
+    firebase.auth().signOut();
     firebase.auth().onAuthStateChanged((user) => {
       if (user){
-        alert('Constructor: Usuário logado com sucesso! ' + user.email);
+        firebase.database().ref('usuarios').child(user.uid).set({
+          nome: this.state.nome
+        })
+        .then(() => {
+          this.setState({nome: '', email: '', senha: ''});
+        });
       }
     })
     
   }
 
-  logar(e){
+  cadastrar(e){
    
-    firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.senha)
+    firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.senha)
     .catch((error) =>{
-      if (error.code == 'auth/wrong-password'){
-        alert('Erro: Senha incorreta');
-      } else {
         alert('Códido do erro: ' + error.code);
-      }
     });
 
     e.preventDefault();
 
   }
 
-  sair(){
-    firebase.auth().signOut();
-    alert('Deslogado com sucesso!');
-  }
-
   render(){
     return(
       <div>
-        <h1>Entrar</h1>
-        <form onSubmit={this.logar}>
+        <h1>Novo Usuário</h1>
+        <form onSubmit={(e) => {this.cadastrar(e)}}>
           <div>
+            <label>Nome</label><br/>
+            <input type="text" value={this.state.nome} onChange={(e) => this.setState({nome: e.target.value})} />
+            <br/>
             <label>E-mail</label><br/>
             <input type="text" value={this.state.email} onChange={(e) => this.setState({email: e.target.value})} />
             <br/>
             <label>Senha</label><br/>
             <input type="password" value={this.state.senha} onChange={(e) => this.setState({senha: e.target.value})} />
-            <br/>
-            <button type="submit">Entrar</button>
+            <br/><br/>
+            <button type="submit">Cadastrar</button>
           </div> 
-          <br/> 
-          <button onClick={this.sair}>Sair</button>
         </form>
       </div>
     );
