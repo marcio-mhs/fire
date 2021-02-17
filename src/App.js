@@ -27,7 +27,7 @@ export default class App extends Component{
       }
     });
 
-    e.preventDefautl();
+    e.preventDefault();
 
   }
 
