@@ -10,18 +10,24 @@ export default class App extends Component{
       senha: ''
     };
 
-    this.cadastrar = this.cadastrar.bind(this);
+    this.logar = this.logar.bind(this);
+
+    this.sair = this.sair.bind(this);
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user){
+        alert('Constructor: Usuário logado com sucesso! ' + user.email);
+      }
+    })
     
   }
 
-  cadastrar(e){
+  logar(e){
    
-    firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.senha)
+    firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.senha)
     .catch((error) =>{
-      if (error.code == 'auth/invalid-email'){
-        alert('E-mail inválido');
-      } else if (error.code =='auth/weak-password'){
-        alert('Senha fraca');
+      if (error.code == 'auth/wrong-password'){
+        alert('Erro: Senha incorreta');
       } else {
         alert('Códido do erro: ' + error.code);
       }
@@ -31,10 +37,16 @@ export default class App extends Component{
 
   }
 
+  sair(){
+    firebase.auth().signOut();
+    alert('Deslogado com sucesso!');
+  }
+
   render(){
     return(
       <div>
-        <form onSubmit={this.cadastrar}>
+        <h1>Entrar</h1>
+        <form onSubmit={this.logar}>
           <div>
             <label>E-mail</label><br/>
             <input type="text" value={this.state.email} onChange={(e) => this.setState({email: e.target.value})} />
@@ -42,8 +54,10 @@ export default class App extends Component{
             <label>Senha</label><br/>
             <input type="password" value={this.state.senha} onChange={(e) => this.setState({senha: e.target.value})} />
             <br/>
-            <button type="submit">Cadastrar</button>
-          </div>  
+            <button type="submit">Entrar</button>
+          </div> 
+          <br/> 
+          <button onClick={this.sair}>Sair</button>
         </form>
       </div>
     );
